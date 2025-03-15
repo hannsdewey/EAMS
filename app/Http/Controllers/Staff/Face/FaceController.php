@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Staff\Face;
 
 use App\Http\Controllers\Controller;
+use App\Models\Attendance;
+use App\Models\ShiftSchedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -87,36 +89,78 @@ class FaceController extends Controller
     public function PostRecordFace(Request $request)
     {
         $getUser = DB::table('user_infomations')->where('full_name', $request->name)->first('user_id');
-        if (Session::get('first_name') != $request->name) {
-            $checkType = DB::table('user_track')->where('user_id', $getUser->user_id)->orderBy('id', 'desc')->first();
-
-            if ($checkType == null) {
-                $type = 0;
-            } else {
-                if ($checkType->type == 0) {
-                    $type = 1;
-                } else if ($checkType->type == 1) {
-                    $type = 0;
-                }
-            }
-
-            DB::table('user_track')->insert(
-                [
-                    'user_id' => $getUser->user_id,
-                    'type' => $type,
-                    'created_at' => time()
-                ]
-            );
-            Session::put('first_name', $request->name);
-            if ($type == 0) {
-                $time = $request->name . " - Hour in " . Carbon::now('America/Los_Angeles');
-            } else {
-                $time = $request->name . " - Hour out " . Carbon::now('America/Los_Angeles');
-            }
-
-            echo $time;
-        } else {
-            echo "Staff " . $request->name . " successfully identified, please invite the next person";
+        if (!$getUser) {
+            return response()->json(['error' => 'User not found'], 404);
         }
+
+        $today = Carbon::today();
+        $now = Carbon::now();
+
+        // Check if user has schedule for today
+        $schedule = ShiftSchedule::where('user_id', $getUser->user_id)
+            ->whereDate('date', $today)
+            ->where('status', 'active')
+            ->first();
+
+        if (!$schedule) {
+            return response()->json(['error' => 'No schedule found for today'], 403);
+        }
+
+        // Get or create today's attendance record
+        $attendance = Attendance::firstOrCreate(
+            [
+                'user_id' => $getUser->user_id,
+                'date' => $today
+            ],
+            [
+                'status' => 'present',
+                'work_hours' => 0,
+                'overtime_hours' => 0
+            ]
+        );
+
+        // Determine next action based on current state
+        if (!$attendance->clock_in) {
+            $attendance->clock_in = $now;
+            $attendance->status = $now->gt(Carbon::parse($schedule->shift_start)) ? 'late' : 'present';
+        } elseif (!$attendance->break_in && !$attendance->break_out) {
+            $attendance->break_in = $now;
+        } elseif ($attendance->break_in && !$attendance->break_out) {
+            $attendance->break_out = $now;
+        } elseif (!$attendance->clock_out) {
+            $attendance->clock_out = $now;
+            
+            // Calculate work hours
+            $totalMinutes = $now->diffInMinutes(Carbon::parse($attendance->clock_in));
+            if ($attendance->break_in && $attendance->break_out) {
+                $breakMinutes = Carbon::parse($attendance->break_out)
+                    ->diffInMinutes(Carbon::parse($attendance->break_in));
+                $totalMinutes -= $breakMinutes;
+            }
+            
+            $attendance->work_hours = round($totalMinutes / 60, 2);
+            
+            // Calculate overtime if applicable
+            $scheduledEnd = Carbon::parse($schedule->shift_end);
+            if ($now->gt($scheduledEnd)) {
+                $overtimeMinutes = $now->diffInMinutes($scheduledEnd);
+                $attendance->overtime_hours = round($overtimeMinutes / 60, 2);
+            }
+        }
+
+        $attendance->save();
+
+        // Determine message based on action taken
+        if ($attendance->clock_in && !$attendance->break_in) {
+            $message = $request->name . " - Clocked in at " . $attendance->clock_in->format('H:i:s');
+        } elseif ($attendance->break_in && !$attendance->break_out) {
+            $message = $request->name . " - Break started at " . $attendance->break_in->format('H:i:s');
+        } elseif ($attendance->break_out && !$attendance->clock_out) {
+            $message = $request->name . " - Break ended at " . $attendance->break_out->format('H:i:s');
+        } elseif ($attendance->clock_out) {
+            $message = $request->name . " - Clocked out at " . $attendance->clock_out->format('H:i:s');
+        }
+
+        return response()->json(['message' => $message]);
     }
 }

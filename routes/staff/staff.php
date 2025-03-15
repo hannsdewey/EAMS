@@ -9,6 +9,8 @@ use App\Http\Controllers\Staff\Bonus\BonusController;
 use App\Http\Controllers\Staff\Discipline\DisciplineController;
 use App\Http\Controllers\Staff\Leave\LeaveRequestController;
 use App\Http\Controllers\Staff\Salary\SalaryController;
+use App\Http\Controllers\Staff\AttendanceController;
+use App\Http\Controllers\Staff\ShiftScheduleController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => 'checkuser'], function () {
@@ -30,16 +32,12 @@ Route::group(['middleware' => 'checkuser'], function () {
         Route::get('/complete-the-work/{id}', [WorkController::class, 'FinishWork']);
     });
 
-
-
     Route::prefix('leave-requests')->group(function () {
         Route::get('/', [LeaveRequestController::class, 'index'])->name('staff.leave-requests.index');
         Route::get('/create', [LeaveRequestController::class, 'create'])->name('staff.leave-requests.create');
         Route::post('/store', [LeaveRequestController::class, 'store'])->name('staff.leave-requests.store');
         Route::get('/{id}', [LeaveRequestController::class, 'show'])->name('staff.leave-requests.show');
     });
-
-
 
     Route::prefix('identity-management')->group(function () {
         Route::get('/', [FaceController::class, 'FaceStaffDetail']);
@@ -59,6 +57,16 @@ Route::group(['middleware' => 'checkuser'], function () {
     Route::post('/register-faces', [FaceController::class, 'PostRegisterFace']);
 
     Route::get('/log-out', [AccountController::class, 'Logout']);
+
+    Route::prefix('attendance')->group(function () {
+        Route::get('/', [AttendanceController::class, 'index'])->name('staff.attendance.index');
+        Route::get('/next-action', [AttendanceController::class, 'getNextAction'])->name('staff.attendance.next-action');
+    });
+
+    Route::prefix('schedule')->group(function () {
+        Route::get('/', [ShiftScheduleController::class, 'index'])->name('staff.schedule.index');
+        Route::get('/events', [ShiftScheduleController::class, 'getSchedules'])->name('staff.schedule.events');
+    });
 });
 Route::get('/time-keeping', [FaceController::class, 'RecordFace']);
 Route::post('/face-recognition', [FaceController::class, 'PostRecordFace']);

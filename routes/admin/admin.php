@@ -18,6 +18,8 @@ use App\Http\Controllers\Admin\ChangePassword\ChangePasswordController;
 use App\Http\Controllers\Admin\Work\WorkController;
 use App\Http\Controllers\Admin\EmailCampaign\EmailCampaignController;
 use App\Http\Controllers\Admin\Face\FaceController;
+use App\Http\Controllers\Admin\AttendanceController;
+use App\Http\Controllers\Admin\ShiftScheduleController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -178,6 +180,20 @@ Route::prefix('admin')->group(function () {
             Route::get('/', [FaceController::class, 'ListFaceStaff']);
             Route::get('/view-data/{id}', [FaceController::class, 'FaceStaffDetail']);
             Route::get('/register-again/{id}', [FaceController::class, 'ResetFaceStaff']);
+        });
+
+        Route::prefix('attendance')->group(function () {
+            Route::get('/', [AttendanceController::class, 'index'])->name('admin.attendance.index');
+            Route::get('/today', [AttendanceController::class, 'todayStatus'])->name('admin.attendance.today');
+        });
+
+        Route::prefix('schedule')->group(function () {
+            Route::get('/', [ShiftScheduleController::class, 'index'])->name('admin.schedule.index');
+            Route::get('/events', [ShiftScheduleController::class, 'getSchedules'])->name('admin.schedule.events');
+            Route::get('/{id}', [ShiftScheduleController::class, 'get'])->name('admin.schedule.get');
+            Route::post('/', [ShiftScheduleController::class, 'store'])->name('admin.schedule.store');
+            Route::put('/{id}', [ShiftScheduleController::class, 'update'])->name('admin.schedule.update');
+            Route::delete('/{id}', [ShiftScheduleController::class, 'destroy'])->name('admin.schedule.delete');
         });
     });
     Route::get('/login', [AccountController::class, 'Login']);
