@@ -8,7 +8,7 @@
   <title>@yield('Title')</title>
   <!-- plugins:css -->
   <link rel="stylesheet" href="{{ asset('vendors/feather/feather.css')}}">
-  <link rel="stylesheet" href="{{ asset('vendors/ti-icons/css/themify-icons.css')}}">
+  <link rel="stylesheet" href="{{ asset('vendors/ti-icons/css/themify-icons.css')}}"> 
   <link rel="stylesheet" href="{{ asset('vendors/css/vendor.bundle.base.css')}}">
   <!-- endinject -->
   <!-- Plugin css for this page -->

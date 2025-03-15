@@ -28,6 +28,26 @@
     </li>
 
     <li class="nav-item">
+      <a class="nav-link" data-toggle="collapse" href="#staffLeave" aria-expanded="false" aria-controls="staffLeave">
+          <i class="ti-calendar menu-icon"></i>
+          <span class="menu-title">My Leave</span>
+          <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="staffLeave">
+          <ul class="nav flex-column sub-menu">
+              <li class="nav-item">
+                  <a class="nav-link" href="{{ route('staff.leave-requests.index') }}">My Leave Requests</a>
+              </li>
+              <li class="nav-item">
+                  <a class="nav-link" href="{{ route('staff.leave-requests.create') }}">Apply for Leave</a>
+              </li>
+          </ul>
+      </div>
+  </li>
+  
+  
+    
+    <li class="nav-item">
       <a class="nav-link" data-toggle="collapse" href="#khenthuong" aria-expanded="false" aria-controls="khenthuong">
         <i class="icon-grid-2 menu-icon"></i>
         <span class="menu-title">Reward-discipline</span>

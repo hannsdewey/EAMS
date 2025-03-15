@@ -11,40 +11,43 @@ use DB;
 
 
 class AccountController extends Controller
-{   
-    public function Logout(){
-        if(Auth::user()){
+{
+    public function Logout()
+    {
+        if (Auth::check()) {
             Auth::logout();
+            request()->session()->invalidate();
+            request()->session()->regenerateToken();
+        }
+        return Redirect::to('/');
+    }
+
+    public function Login()
+    {
+        if (Auth::user()) {
             return Redirect::to('/');
+        } else {
+            return view('Admin.Login.Index');
         }
     }
-    public function Login(){
-        if(Auth::user()){
-            return Redirect::to('/');
-        }else{
-            return view('Admin.Login.Index');
-        } 
-    }
-    public function LoginPost(Request $request){
+    public function LoginPost(Request $request)
+    {
+        $credentials = $request->validate([
+            'name' => 'required',
+            'password' => 'required'
+        ]);
 
+        if (Auth::attempt(['name' => $credentials['name'], 'password' => $credentials['password']])) {
+            $user = Auth::user();
 
-        $name =  $request->name;
-        $password =  md5($request->password);
-        $user = User::where('name', '=', $name)->where('password', '=', $password)->first();
-        
-
-        if($user){
-            if($user->role==1){
-                Auth::login($user,true);
+            if ($user->role == 1) {
                 return Redirect::to('/admin/user-management');
-            }else{
-                return redirect()->back()->with('msg', 'Wrong account or password');
+            } else {
+                Auth::logout();
+                return redirect()->back()->with('msg', 'Unauthorized access.');
             }
-        }else{
-             return redirect()->back()->with('msg', 'Wrong account or password'); 
-        }  
-
+        } else {
+            return redirect()->back()->with('msg', 'Wrong account or password');
+        }
     }
-
-    
 }

@@ -75,7 +75,7 @@
                                   <button class="btn bg mr-2 text-white">See details</button>
                                 </a>
                                 @if($item->active == 1)
-                                <button class="btn btn-danger" data-toggle="modal" data-target="#exampleModalBlock{{$item->id}}">Temporarily locked</button>
+                                <button class="btn btn-danger" data-toggle="modal" data-target="#exampleModalBlock{{$item->id}}">Locked</button>
                                 @elseif($item->active == 0)
                                 <button class="btn btn-success"  data-toggle="modal" data-target="#exampleModalUnLock{{$item->id}}">Unlock</button>
                                 @endif                              

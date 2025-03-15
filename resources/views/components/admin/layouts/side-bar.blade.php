@@ -38,7 +38,7 @@
       <a class="nav-link" data-toggle="collapse" href="#salary" aria-expanded="false" aria-controls="salary">
         <i class="icon-columns menu-icon"></i>
         <span class="menu-title">Salary Management</span>
-        <i class="menu-arrow"></i>
+        <i class="menu-arrow"></i> 
       </a>
       <div class="collapse" id="salary">
         <ul class="nav flex-column sub-menu">
@@ -47,6 +47,25 @@
         </ul>
       </div>
     </li>
+
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="collapse" href="#leave" aria-expanded="false" aria-controls="leave">
+          <i class="ti-shift-right menu-icon"></i>
+          <span class="menu-title">Leave Requests</span>
+          <i class="menu-arrow"></i> 
+      </a>
+      <div class="collapse" id="leave">
+          <ul class="nav flex-column sub-menu">
+              <li class="nav-item"> 
+                  <a class="nav-link" href="{{ url('admin/leave-types') }}">Leave Type</a>
+              </li>
+              <li class="nav-item"> 
+                  <a class="nav-link" href="{{ url('admin/leave') }}">Leave Management</a>
+              </li>  
+          </ul>
+      </div>
+  </li>
+  
 
     <li class="nav-item">
       <a class="nav-link" href="{{url('admin/workflow-management')}}">
