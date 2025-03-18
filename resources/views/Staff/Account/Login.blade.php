@@ -1,5 +1,5 @@
-@extends("Admin.Layouts.Master")
-@section('Title', 'Admin Login')
+@extends("Staff.Layouts.Master")
+@section('Title', 'Staff Login')
 @section('Content')
 <div class="container-scroller">
     <div class="container-fluid page-body-wrapper full-page-wrapper">
@@ -10,7 +10,7 @@
                         <div class="brand-logo">
                             <img src="{{ asset('assets/images/logo.png') }}" alt="logo">
                         </div>
-                        <h4>Admin Login</h4>
+                        <h4>Staff Login</h4>
                         <h6 class="font-weight-light">Sign in to continue.</h6>
                         
                         @if($errors->any())
@@ -23,13 +23,7 @@
                             </div>
                         @endif
 
-                        @if(session('msg'))
-                            <div class="alert alert-danger">
-                                {{ session('msg') }}
-                            </div>
-                        @endif
-
-                        <form class="pt-3" method="POST" action="{{ route('admin.login.post') }}">
+                        <form class="pt-3" method="POST" action="{{ route('staff.login.post') }}">
                             @csrf
                             <div class="form-group">
                                 <input type="email" class="form-control form-control-lg" id="email" name="email" placeholder="Email" value="{{ old('email') }}" required>
@@ -41,7 +35,7 @@
                                 <button type="submit" class="btn btn-block btn-primary btn-lg font-weight-medium auth-form-btn">SIGN IN</button>
                             </div>
                             <div class="text-center mt-4">
-                                <a href="{{ route('staff.login') }}" class="text-primary">Staff Login</a>
+                                <a href="{{ route('admin.login') }}" class="text-primary">Admin Login</a>
                             </div>
                         </form>
                     </div>
@@ -50,4 +44,4 @@
         </div>
     </div>
 </div>
-@endsection
+@endsection 

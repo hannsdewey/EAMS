@@ -25,6 +25,10 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::prefix('admin')->group(function () {
+    // Admin Login Routes
+    Route::get('/login', [AccountController::class, 'Login'])->name('admin.login');
+    Route::post('/login', [AccountController::class, 'LoginPost'])->name('admin.login.post');
+
     Route::group(['middleware' => 'checkadmin'], function () {
         Route::get('log-out', [AccountController::class, 'Logout']);
         Route::prefix('user-management')->group(function () {
@@ -115,11 +119,11 @@ Route::prefix('admin')->group(function () {
 
 
         // Leave Request Routes (Admin Approval)
-        Route::prefix('leave')->group(function () {
-            Route::get('/', [LeaveRequestController::class, 'index'])->name('admin.leave.index');
-            Route::get('/{id}', [LeaveRequestController::class, 'show'])->name('admin.leave.show');
-            Route::post('/approve/{id}', [LeaveRequestController::class, 'approve'])->name('admin.leave.approve');
-            Route::post('/reject/{id}', [LeaveRequestController::class, 'reject'])->name('admin.leave.reject');
+        Route::prefix('leave')->name('leave.')->group(function () {
+            Route::get('/', [LeaveRequestController::class, 'index'])->name('index');
+            Route::get('/{id}', [LeaveRequestController::class, 'show'])->name('show');
+            Route::post('/{id}/approve', [LeaveRequestController::class, 'approve'])->name('approve');
+            Route::post('/{id}/reject', [LeaveRequestController::class, 'reject'])->name('reject');
         });
 
         Route::prefix('bonus')->group(function () {
@@ -196,6 +200,4 @@ Route::prefix('admin')->group(function () {
             Route::delete('/{id}', [ShiftScheduleController::class, 'destroy'])->name('admin.schedule.delete');
         });
     });
-    Route::get('/login', [AccountController::class, 'Login']);
-    Route::post('/login', [AccountController::class, 'LoginPost']);
 });

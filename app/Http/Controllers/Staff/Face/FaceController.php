@@ -129,7 +129,7 @@ class FaceController extends Controller
             $attendance->break_out = $now;
         } elseif (!$attendance->clock_out) {
             $attendance->clock_out = $now;
-            
+
             // Calculate work hours
             $totalMinutes = $now->diffInMinutes(Carbon::parse($attendance->clock_in));
             if ($attendance->break_in && $attendance->break_out) {
@@ -137,9 +137,9 @@ class FaceController extends Controller
                     ->diffInMinutes(Carbon::parse($attendance->break_in));
                 $totalMinutes -= $breakMinutes;
             }
-            
+
             $attendance->work_hours = round($totalMinutes / 60, 2);
-            
+
             // Calculate overtime if applicable
             $scheduledEnd = Carbon::parse($schedule->shift_end);
             if ($now->gt($scheduledEnd)) {

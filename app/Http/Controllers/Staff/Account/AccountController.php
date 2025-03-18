@@ -5,52 +5,57 @@ namespace App\Http\Controllers\Staff\Account;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Redirect;
 use DB;
 
 
 class AccountController extends Controller
-{   
-    public function Logout(){
-        if(Auth::user()){
-            Auth::logout();
-            return Redirect::to('/');
+{
+    public function Logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return Redirect::to('/');
+    }
+    public function Login()
+    {
+        return view('Staff.Account.Login');
+    }
+    public function PostLogin(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required|min:6'
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput($request->except('password'));
         }
-    }
-    public function Login(){
-        if(Auth::user()){
-            if(Auth::user()->role == 1){
-                return Redirect::to('admin/user-management');
-            }else if(Auth::user()->role == 2){
-                return Redirect::to('account-information');
+
+        $credentials = $request->only('email', 'password');
+
+        if (Auth::attempt($credentials)) {
+            $user = Auth::user();
+
+            if ($user->role != 2) {
+                Auth::logout();
+                return redirect()->back()
+                    ->withErrors(['email' => 'You do not have permission to access the staff area.'])
+                    ->withInput($request->except('password'));
             }
-            
-        }else{
-            return view('Staff.Login.Login');
-        } 
+
+            $request->session()->regenerate();
+            return redirect()->route('staff.attendance.index');
+        }
+
+        return redirect()->back()
+            ->withErrors(['email' => 'These credentials do not match our records.'])
+            ->withInput($request->except('password'));
     }
-    public function PostLogin(Request $request){
-
-        $user = User::where('phone', '=', $request->phone)->where('password', '=', md5($request->password))->first();
-
-        if($user){
-            if($user->role==2){
-                if($user->active ==1 && $user->is_deleted ==0){
-                    Auth::login($user,true);
-                    return Redirect::to('/account-information');
-                }else{
-                   return redirect()->back()->with('msg', 'Your account is temporarily locked'); 
-                }
-                
-            }else{
-                return redirect()->back()->with('msg', 'Wrong account or password');
-            }
-        }else{
-            return redirect()->back()->with('msg', 'Wrong account or password'); 
-        }  
-
- }
-
-
 }

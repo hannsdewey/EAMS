@@ -11,6 +11,7 @@ use App\Http\Controllers\Staff\Leave\LeaveRequestController;
 use App\Http\Controllers\Staff\Salary\SalaryController;
 use App\Http\Controllers\Staff\AttendanceController;
 use App\Http\Controllers\Staff\ShiftScheduleController;
+use App\Http\Controllers\Staff\ReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => 'checkuser'], function () {
@@ -66,6 +67,10 @@ Route::group(['middleware' => 'checkuser'], function () {
     Route::prefix('schedule')->group(function () {
         Route::get('/', [ShiftScheduleController::class, 'index'])->name('staff.schedule.index');
         Route::get('/events', [ShiftScheduleController::class, 'getSchedules'])->name('staff.schedule.events');
+    });
+
+    Route::prefix('reports')->group(function () {
+        Route::get('/', [ReportController::class, 'index'])->name('staff.reports.index');
     });
 });
 Route::get('/time-keeping', [FaceController::class, 'RecordFace']);

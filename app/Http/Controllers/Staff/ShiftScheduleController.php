@@ -12,7 +12,7 @@ class ShiftScheduleController extends Controller
 {
     public function index()
     {
-        return view('staff.schedule.index');
+        return view('Staff.Schedule.index');
     }
 
     public function getSchedules(Request $request)
@@ -21,23 +21,24 @@ class ShiftScheduleController extends Controller
         $end = Carbon::parse($request->end);
 
         $schedules = ShiftSchedule::where('user_id', Auth::id())
-            ->whereBetween('date', [$start, $end])
             ->where('status', 'active')
+            ->whereBetween('date', [$start, $end])
             ->get()
             ->map(function ($schedule) {
                 return [
                     'id' => $schedule->id,
-                    'title' => 'Shift: ' . Carbon::parse($schedule->shift_start)->format('H:i') . 
-                              ' - ' . Carbon::parse($schedule->shift_end)->format('H:i'),
-                    'start' => $schedule->date . 'T' . $schedule->shift_start,
-                    'end' => $schedule->date . 'T' . $schedule->shift_end,
-                    'break_start' => $schedule->break_start ? 
-                        $schedule->date . 'T' . $schedule->break_start : null,
-                    'break_end' => $schedule->break_end ? 
-                        $schedule->date . 'T' . $schedule->break_end : null,
+                    'title' => 'Shift: ' . Carbon::parse($schedule->shift_start)->format('H:i') . ' - ' .
+                        Carbon::parse($schedule->shift_end)->format('H:i'),
+                    'start' => $schedule->date->format('Y-m-d'),
+                    'end' => $schedule->date->format('Y-m-d'),
+                    'backgroundColor' => '#3c8dbc',
+                    'borderColor' => '#3c8dbc',
+                    'break_start' => $schedule->break_start,
+                    'break_end' => $schedule->break_end,
+                    'allDay' => true
                 ];
             });
 
         return response()->json($schedules);
     }
-} 
+}

@@ -13,17 +13,25 @@
         </ul>
       </div>
     </li>
+
     <li class="nav-item">
-      <a class="nav-link" href="{{url('workflow-management')}}">
-        <i class="icon-bar-graph menu-icon"></i>
-        <span class="menu-title">Workflow management</span>
+      <a class="nav-link" href="{{ route('staff.attendance.index') }}">
+        <i class="icon-clock menu-icon"></i>
+        <span class="menu-title">Attendance</span>
       </a>
     </li>
 
     <li class="nav-item">
-      <a class="nav-link" href="{{url('salary-management')}}">
-        <i class="icon-bar-graph menu-icon"></i>
-        <span class="menu-title">Salary Management</span>
+      <a class="nav-link" href="{{ route('staff.schedule.index') }}">
+        <i class="icon-calendar menu-icon"></i>
+        <span class="menu-title">Shift Schedule</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="{{ route('staff.reports.index') }}">
+        <i class="icon-chart menu-icon"></i>
+        <span class="menu-title">Reports</span>
       </a>
     </li>
 
@@ -43,9 +51,21 @@
               </li>
           </ul>
       </div>
-  </li>
-  
-  
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="{{url('workflow-management')}}">
+        <i class="icon-bar-graph menu-icon"></i>
+        <span class="menu-title">Workflow management</span>
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" href="{{url('salary-management')}}">
+        <i class="icon-wallet menu-icon"></i>
+        <span class="menu-title">Salary Management</span>
+      </a>
+    </li>
     
     <li class="nav-item">
       <a class="nav-link" data-toggle="collapse" href="#khenthuong" aria-expanded="false" aria-controls="khenthuong">
@@ -57,20 +77,21 @@
         <ul class="nav flex-column sub-menu">
           <li class="nav-item"> <a class="nav-link" href="{{url('bonus')}}">Bonus</a></li>
           <li class="nav-item"> <a class="nav-link" href="{{url('discipline')}}">Discipline</a></li>
-          
         </ul>
       </div>
     </li>
+
     <li class="nav-item">
       <a class="nav-link" href="{{url('identity-management')}}">
-        <i class="icon-paper menu-icon"></i>
-        <span class="menu-title">Identity management</span>
+        <i class="icon-user menu-icon"></i>
+        <span class="menu-title">Face Recognition</span>
       </a>
     </li>
+
     <li class="nav-item">
       <a class="nav-link" href="{{url('register-faces')}}">
-        <i class="icon-paper menu-icon"></i>
-        <span class="menu-title">Face registration</span>
+        <i class="icon-camera menu-icon"></i>
+        <span class="menu-title">Face Registration</span>
       </a>
     </li>
   </ul>
