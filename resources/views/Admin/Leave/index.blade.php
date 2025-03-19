@@ -45,7 +45,9 @@
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <a href="{{ route('admin.leave.show', $request->id) }}" class="btn btn-primary btn-sm">View</a>
+                                                        <a href="{{ route('admin.leave-requests.show', $request->id) }}" class="btn btn-info btn-sm">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
                                                         @if($request->status == 'pending')
                                                             <a href="{{ route('admin.leave-requests.approve', $request->id) }}" class="btn btn-success btn-sm">Approve</a>
                                                             <a href="{{ route('admin.leave-requests.reject', $request->id) }}" class="btn btn-danger btn-sm">Reject</a>

@@ -121,11 +121,11 @@ Route::prefix('admin')->group(function () {
 
 
         // Leave Request Routes (Admin Approval)
-        Route::prefix('leave')->name('leave.')->group(function () {
-            Route::get('/', [LeaveRequestController::class, 'index'])->name('index');
-            Route::get('/{id}', [LeaveRequestController::class, 'show'])->name('show');
-            Route::post('/{id}/approve', [LeaveRequestController::class, 'approve'])->name('approve');
-            Route::post('/{id}/reject', [LeaveRequestController::class, 'reject'])->name('reject');
+        Route::prefix('leave')->group(function () {
+            Route::get('/', [LeaveRequestController::class, 'index'])->name('admin.leave-requests.index');
+            Route::get('/{leave}', [LeaveRequestController::class, 'show'])->name('admin.leave-requests.show');
+            Route::put('/{leave}/approve', [LeaveRequestController::class, 'approve'])->name('admin.leave-requests.approve');
+            Route::put('/{leave}/reject', [LeaveRequestController::class, 'reject'])->name('admin.leave-requests.reject');
         });
 
         Route::prefix('bonus')->group(function () {

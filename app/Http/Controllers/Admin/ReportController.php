@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Attendance;
+use App\Models\Department;
 use App\Models\Leave;
+use App\Models\Position;
 use App\Models\Report;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -14,35 +16,47 @@ class ReportController extends Controller
 {
     public function index(Request $request)
     {
-        $query = User::where('role', 'staff');
+        // Get filter parameters
+        $departmentId = $request->input('department');
+        $positionId = $request->input('position');
 
-        // Apply filters
-        if ($request->filled('department')) {
-            $query->where('department_id', $request->department);
-        }
-        if ($request->filled('position')) {
-            $query->where('position_id', $request->position);
-        }
+        // Get all departments and positions for filters
+        $departments = Department::all();
+        $positions = Position::all();
 
+        // Get users based on filters
+        $query = User::query();
+        if ($departmentId) {
+            $query->where('department_id', $departmentId);
+        }
+        if ($positionId) {
+            $query->where('position_id', $positionId);
+        }
         $users = $query->get();
 
         // Get attendance summary
         $attendanceSummary = Attendance::selectRaw('
             COUNT(*) as total_days,
             SUM(CASE WHEN status = "present" THEN 1 ELSE 0 END) as present_days,
-            SUM(CASE WHEN status = "absent" THEN 1 ELSE 0 END) as absent_days,
-            SUM(CASE WHEN status = "late" THEN 1 ELSE 0 END) as late_days
+            SUM(CASE WHEN status = "late" THEN 1 ELSE 0 END) as late_days,
+            SUM(CASE WHEN status = "absent" THEN 1 ELSE 0 END) as absent_days
         ')->first();
 
         // Get leave summary
         $leaveSummary = Leave::selectRaw('
             COUNT(*) as total_requests,
             SUM(CASE WHEN status = "approved" THEN 1 ELSE 0 END) as approved_requests,
-            SUM(CASE WHEN status = "rejected" THEN 1 ELSE 0 END) as rejected_requests,
-            SUM(CASE WHEN status = "pending" THEN 1 ELSE 0 END) as pending_requests
+            SUM(CASE WHEN status = "pending" THEN 1 ELSE 0 END) as pending_requests,
+            SUM(CASE WHEN status = "rejected" THEN 1 ELSE 0 END) as rejected_requests
         ')->first();
 
-        return view('Admin.reports.index', compact('users', 'attendanceSummary', 'leaveSummary'));
+        return view('Admin.reports.index', compact(
+            'users',
+            'departments',
+            'positions',
+            'attendanceSummary',
+            'leaveSummary'
+        ));
     }
 
     public function generateReport()
