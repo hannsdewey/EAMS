@@ -1,202 +1,155 @@
-@extends('layouts.admin')
+@extends("Admin.Layouts.Master")
+@section('Title', 'Reports')
+@section('Content')
+<div class="container-scroller">
+    <x-admin.layouts.header-dashboard/>
+    <div class="container-fluid page-body-wrapper">
+        <div class="theme-setting-wrapper">
+        </div>
+        <div class="side-bar-box" style="width: 250px;">
+            <x-admin.layouts.side-bar/>
+        </div>
+        <div class="main-panel">
+            <div class="content-wrapper p-3">
+                <div class="row">
+                    <div class="col-md-12 grid-margin">
+                        <div class="row">
+                            <div class="col-12 col-xl-12 mb-4 mb-xl-0 p-0">
+                                <div class="bg-white">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h3 class="card-title">Reports</h3>
+                                            <div class="card-tools">
+                                                <form action="{{ route('admin.reports.index') }}" method="GET" class="form-inline">
+                                                    <select name="department" class="form-control mr-2">
+                                                        <option value="">All Departments</option>
+                                                        @foreach($departments as $department)
+                                                            <option value="{{ $department->id }}" {{ request('department') == $department->id ? 'selected' : '' }}>
+                                                                {{ $department->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    <select name="position" class="form-control mr-2">
+                                                        <option value="">All Positions</option>
+                                                        @foreach($positions as $position)
+                                                            <option value="{{ $position->id }}" {{ request('position') == $position->id ? 'selected' : '' }}>
+                                                                {{ $position->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    <button type="submit" class="btn btn-primary">Filter</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <!-- Attendance Summary -->
+                                            <div class="row mb-4">
+                                                <div class="col-md-3">
+                                                    <div class="card bg-primary text-white">
+                                                        <div class="card-body">
+                                                            <h5 class="card-title">Total Days</h5>
+                                                            <h2>{{ $attendanceSummary->total_days ?? 0 }}</h2>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="card bg-success text-white">
+                                                        <div class="card-body">
+                                                            <h5 class="card-title">Present Days</h5>
+                                                            <h2>{{ $attendanceSummary->present_days ?? 0 }}</h2>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="card bg-warning text-white">
+                                                        <div class="card-body">
+                                                            <h5 class="card-title">Late Days</h5>
+                                                            <h2>{{ $attendanceSummary->late_days ?? 0 }}</h2>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="card bg-danger text-white">
+                                                        <div class="card-body">
+                                                            <h5 class="card-title">Absent Days</h5>
+                                                            <h2>{{ $attendanceSummary->absent_days ?? 0 }}</h2>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
 
-@section('styles')
-<link href='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.css' rel='stylesheet' />
-@endsection
+                                            <!-- Leave Summary -->
+                                            <div class="row mb-4">
+                                                <div class="col-md-3">
+                                                    <div class="card bg-info text-white">
+                                                        <div class="card-body">
+                                                            <h5 class="card-title">Total Leave Requests</h5>
+                                                            <h2>{{ $leaveSummary->total_requests ?? 0 }}</h2>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="card bg-success text-white">
+                                                        <div class="card-body">
+                                                            <h5 class="card-title">Approved Requests</h5>
+                                                            <h2>{{ $leaveSummary->approved_requests ?? 0 }}</h2>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="card bg-warning text-white">
+                                                        <div class="card-body">
+                                                            <h5 class="card-title">Pending Requests</h5>
+                                                            <h2>{{ $leaveSummary->pending_requests ?? 0 }}</h2>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="card bg-danger text-white">
+                                                        <div class="card-body">
+                                                            <h5 class="card-title">Rejected Requests</h5>
+                                                            <h2>{{ $leaveSummary->rejected_requests ?? 0 }}</h2>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
 
-@section('content')
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Staff Attendance Reports</h3>
-                    <div class="card-tools">
-                        <form action="{{ route('admin.reports.index') }}" method="GET" class="form-inline">
-                            <select name="user_id" class="form-control mr-2">
-                                <option value="">All Staff</option>
-                                @foreach($users as $user)
-                                    <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>
-                                        {{ $user->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <select name="year" class="form-control mr-2">
-                                <option value="">Select Year</option>
-                                @foreach($years as $year)
-                                    <option value="{{ $year }}" {{ request('year') == $year ? 'selected' : '' }}>
-                                        {{ $year }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <select name="month" class="form-control mr-2">
-                                <option value="">Select Month</option>
-                                @foreach($months as $month)
-                                    <option value="{{ $month }}" {{ request('month') == $month ? 'selected' : '' }}>
-                                        {{ date('F', mktime(0, 0, 0, $month, 1)) }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <button type="submit" class="btn btn-primary mr-2">Filter</button>
-                            <button type="button" class="btn btn-success" id="generateReport">Generate Report</button>
-                        </form>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <canvas id="attendanceChart"></canvas>
-                        </div>
-                        <div class="col-md-6">
-                            <canvas id="hoursChart"></canvas>
+                                            <!-- Employee List -->
+                                            <div class="table-responsive">
+                                                <table class="table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Employee</th>
+                                                            <th>Department</th>
+                                                            <th>Position</th>
+                                                            <th>Status</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach($users as $user)
+                                                            <tr>
+                                                                <td>{{ $user->name }}</td>
+                                                                <td>{{ $user->department->name ?? '-' }}</td>
+                                                                <td>{{ $user->position->name ?? '-' }}</td>
+                                                                <td>
+                                                                    <span class="badge badge-{{ $user->status === 'active' ? 'success' : 'danger' }}">
+                                                                        {{ ucfirst($user->status) }}
+                                                                    </span>
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="table-responsive mt-4">
-                        <table class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Staff</th>
-                                    <th>Present</th>
-                                    <th>Absent</th>
-                                    <th>Late</th>
-                                    <th>Leave</th>
-                                    <th>Work Hours</th>
-                                    <th>Overtime Hours</th>
-                                    <th>Active Shifts</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($reports as $report)
-                                    <tr>
-                                        <td>{{ $report->report_date->format('Y-m-d') }}</td>
-                                        <td>{{ $report->user->name }}</td>
-                                        <td>{{ $report->total_present }}</td>
-                                        <td>{{ $report->total_absent }}</td>
-                                        <td>{{ $report->total_late }}</td>
-                                        <td>{{ $report->total_leave }}</td>
-                                        <td>{{ $report->total_work_hours }}</td>
-                                        <td>{{ $report->total_overtime_hours }}</td>
-                                        <td>{{ $report->active_shifts }}</td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="9" class="text-center">No reports found.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                    {{ $reports->links() }}
                 </div>
             </div>
         </div>
     </div>
 </div>
-@endsection
-
-@push('scripts')
-<script src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js'></script>
-<script>
-$(document).ready(function() {
-    // Prepare data from PHP variables
-    var summaryData = {
-        present: {{ $summary->total_present ?? 0 }},
-        absent: {{ $summary->total_absent ?? 0 }},
-        late: {{ $summary->total_late ?? 0 }},
-        leave: {{ $summary->total_leave ?? 0 }},
-        workHours: {{ $summary->total_work_hours ?? 0 }},
-        overtimeHours: {{ $summary->total_overtime_hours ?? 0 }}
-    };
-
-    // Attendance Status Chart
-    var attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
-    new Chart(attendanceCtx, {
-        type: 'pie',
-        data: {
-            labels: ['Present', 'Absent', 'Late', 'Leave'],
-            datasets: [{
-                data: [
-                    summaryData.present,
-                    summaryData.absent,
-                    summaryData.late,
-                    summaryData.leave
-                ],
-                backgroundColor: [
-                    '#28a745',
-                    '#dc3545',
-                    '#ffc107',
-                    '#17a2b8'
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            title: {
-                display: true,
-                text: 'Attendance Status Distribution'
-            }
-        }
-    });
-
-    // Hours Chart
-    var hoursCtx = document.getElementById('hoursChart').getContext('2d');
-    new Chart(hoursCtx, {
-        type: 'bar',
-        data: {
-            labels: ['Work Hours', 'Overtime Hours'],
-            datasets: [{
-                label: 'Hours',
-                data: [
-                    summaryData.workHours,
-                    summaryData.overtimeHours
-                ],
-                backgroundColor: [
-                    '#007bff',
-                    '#6610f2'
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            title: {
-                display: true,
-                text: 'Work Hours Distribution'
-            },
-            scales: {
-                yAxes: [{
-                    ticks: {
-                        beginAtZero: true
-                    }
-                }]
-            }
-        }
-    });
-
-    // Generate Report Button Handler
-    $('#generateReport').click(function() {
-        var button = $(this);
-        $.ajax({
-            url: '{{ route("admin.reports.generate") }}',
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            },
-            beforeSend: function() {
-                button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Generating...');
-            },
-            success: function(response) {
-                toastr.success('Reports generated successfully');
-                location.reload();
-            },
-            error: function(xhr) {
-                toastr.error('Error generating reports');
-            },
-            complete: function() {
-                button.prop('disabled', false).html('Generate Report');
-            }
-        });
-    });
-});
-</script>
-@endpush 
+@endsection 

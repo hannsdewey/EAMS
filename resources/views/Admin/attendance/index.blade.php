@@ -1,94 +1,70 @@
-@extends('layouts.admin')
-
-@section('content')
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Staff Attendance Records</h3>
-                    <div class="card-tools">
-                        <form action="{{ route('admin.attendance.index') }}" method="GET" class="form-inline">
-                            <select name="user_id" class="form-control mr-2">
-                                <option value="">All Staff</option>
-                                @foreach($users as $user)
-                                    <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>
-                                        {{ $user->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <select name="year" class="form-control mr-2">
-                                <option value="">Select Year</option>
-                                @foreach($years as $year)
-                                    <option value="{{ $year }}" {{ request('year') == $year ? 'selected' : '' }}>
-                                        {{ $year }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <select name="month" class="form-control mr-2">
-                                <option value="">Select Month</option>
-                                @foreach($months as $month)
-                                    <option value="{{ $month }}" {{ request('month') == $month ? 'selected' : '' }}>
-                                        {{ date('F', mktime(0, 0, 0, $month, 1)) }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <select name="day" class="form-control mr-2">
-                                <option value="">Select Day</option>
-                                @foreach($days as $day)
-                                    <option value="{{ $day }}" {{ request('day') == $day ? 'selected' : '' }}>
-                                        {{ $day }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <button type="submit" class="btn btn-primary">Filter</button>
-                        </form>
+@extends("Admin.Layouts.Master")
+@section('Title', 'Attendance Management')
+@section('Content')
+<div class="container-scroller">
+    <x-admin.layouts.header-dashboard/>
+    <div class="container-fluid page-body-wrapper">
+        <div class="theme-setting-wrapper">
+        </div>
+        <div class="side-bar-box" style="width: 250px;">
+            <x-admin.layouts.side-bar/>
+        </div>
+        <div class="main-panel">
+            <div class="content-wrapper p-3">
+                <div class="row">
+                    <div class="col-md-12 grid-margin">
+                        <div class="row">
+                            <div class="col-12 col-xl-12 mb-4 mb-xl-0 p-0">
+                                <div class="bg-white">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h3 class="card-title">Attendance Management</h3>
+                                            <div class="card-tools">
+                                                <a href="{{ route('admin.attendance.today') }}" class="btn btn-primary">
+                                                    Today's Status
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Date</th>
+                                                            <th>Employee</th>
+                                                            <th>Status</th>
+                                                            <th>Check In</th>
+                                                            <th>Check Out</th>
+                                                            <th>Total Hours</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach($attendances as $attendance)
+                                                            <tr>
+                                                                <td>{{ $attendance->date }}</td>
+                                                                <td>{{ $attendance->user->name }}</td>
+                                                                <td>
+                                                                    <span class="badge badge-{{ $attendance->status === 'present' ? 'success' : ($attendance->status === 'late' ? 'warning' : 'danger') }}">
+                                                                        {{ ucfirst($attendance->status) }}
+                                                                    </span>
+                                                                </td>
+                                                                <td>{{ $attendance->check_in }}</td>
+                                                                <td>{{ $attendance->check_out }}</td>
+                                                                <td>{{ $attendance->total_hours }}</td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="mt-4">
+                                                {{ $attendances->links() }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Staff Name</th>
-                                    <th>Date</th>
-                                    <th>Status</th>
-                                    <th>Clock In</th>
-                                    <th>Break In</th>
-                                    <th>Break Out</th>
-                                    <th>Clock Out</th>
-                                    <th>Work Hours</th>
-                                    <th>Overtime</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($attendances as $attendance)
-                                    <tr>
-                                        <td>{{ $attendance->user->name }}</td>
-                                        <td>{{ $attendance->date->format('Y-m-d') }}</td>
-                                        <td>
-                                            <span class="badge badge-{{ $attendance->status == 'present' ? 'success' : 
-                                                ($attendance->status == 'absent' ? 'danger' : 
-                                                ($attendance->status == 'late' ? 'warning' : 'info')) }}">
-                                                {{ ucfirst($attendance->status) }}
-                                            </span>
-                                        </td>
-                                        <td>{{ $attendance->clock_in ? $attendance->clock_in->format('H:i:s') : '-' }}</td>
-                                        <td>{{ $attendance->break_in ? $attendance->break_in->format('H:i:s') : '-' }}</td>
-                                        <td>{{ $attendance->break_out ? $attendance->break_out->format('H:i:s') : '-' }}</td>
-                                        <td>{{ $attendance->clock_out ? $attendance->clock_out->format('H:i:s') : '-' }}</td>
-                                        <td>{{ $attendance->work_hours ?? '-' }}</td>
-                                        <td>{{ $attendance->overtime_hours ?? '-' }}</td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="9" class="text-center">No attendance records found.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                    {{ $attendances->links() }}
                 </div>
             </div>
         </div>

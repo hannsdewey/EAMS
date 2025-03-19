@@ -49,6 +49,46 @@
     </li>
 
     <li class="nav-item">
+      <a class="nav-link" data-toggle="collapse" href="#attendance" aria-expanded="false" aria-controls="attendance">
+        <i class="icon-clock menu-icon"></i>
+        <span class="menu-title">Attendance</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="attendance">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"> <a class="nav-link" href="{{ route('admin.attendance.index') }}">Attendance Records</a></li>
+          <li class="nav-item"> <a class="nav-link" href="{{ route('admin.attendance.today') }}">Today's Status</a></li>
+        </ul>
+      </div>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="collapse" href="#reports" aria-expanded="false" aria-controls="reports">
+        <i class="icon-chart menu-icon"></i>
+        <span class="menu-title">Reports</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="reports">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"> <a class="nav-link" href="{{ route('admin.reports.index') }}">Attendance Reports</a></li>
+        </ul>
+      </div>
+    </li>
+
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="collapse" href="#schedule" aria-expanded="false" aria-controls="schedule">
+        <i class="icon-calendar menu-icon"></i>
+        <span class="menu-title">Schedule</span>
+        <i class="menu-arrow"></i>
+      </a>
+      <div class="collapse" id="schedule">
+        <ul class="nav flex-column sub-menu">
+          <li class="nav-item"> <a class="nav-link" href="{{ route('admin.schedule.index') }}">Schedule Management</a></li>
+        </ul>
+      </div>
+    </li>
+
+    <li class="nav-item">
       <a class="nav-link" data-toggle="collapse" href="#leave" aria-expanded="false" aria-controls="leave">
           <i class="ti-shift-right menu-icon"></i>
           <span class="menu-title">Leave Requests</span>

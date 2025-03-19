@@ -20,6 +20,8 @@ use App\Http\Controllers\Admin\EmailCampaign\EmailCampaignController;
 use App\Http\Controllers\Admin\Face\FaceController;
 use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\ShiftScheduleController;
+use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\ScheduleController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -191,13 +193,17 @@ Route::prefix('admin')->group(function () {
             Route::get('/today', [AttendanceController::class, 'todayStatus'])->name('admin.attendance.today');
         });
 
+        // Reports Routes
+        Route::prefix('reports')->group(function () {
+            Route::get('/', [ReportController::class, 'index'])->name('admin.reports.index');
+        });
+
+        // Schedule Routes
         Route::prefix('schedule')->group(function () {
-            Route::get('/', [ShiftScheduleController::class, 'index'])->name('admin.schedule.index');
-            Route::get('/events', [ShiftScheduleController::class, 'getSchedules'])->name('admin.schedule.events');
-            Route::get('/{id}', [ShiftScheduleController::class, 'get'])->name('admin.schedule.get');
-            Route::post('/', [ShiftScheduleController::class, 'store'])->name('admin.schedule.store');
-            Route::put('/{id}', [ShiftScheduleController::class, 'update'])->name('admin.schedule.update');
-            Route::delete('/{id}', [ShiftScheduleController::class, 'destroy'])->name('admin.schedule.delete');
+            Route::get('/', [ScheduleController::class, 'index'])->name('admin.schedule.index');
+            Route::post('/', [ScheduleController::class, 'store'])->name('admin.schedule.store');
+            Route::put('/{schedule}', [ScheduleController::class, 'update'])->name('admin.schedule.update');
+            Route::delete('/{schedule}', [ScheduleController::class, 'destroy'])->name('admin.schedule.destroy');
         });
     });
 });

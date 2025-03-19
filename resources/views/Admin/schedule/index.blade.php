@@ -1,191 +1,227 @@
-@extends('layouts.admin')
-
-@section('styles')
-<link href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css' rel='stylesheet' />
-<style>
-.modal-dialog {
-    max-width: 600px;
-}
-</style>
-@endsection
-
-@section('content')
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Staff Shift Schedule</h3>
-                    <div class="card-tools">
-                        <select id="staff-filter" class="form-control">
-                            <option value="">All Staff</option>
-                            @foreach($users as $user)
-                                <option value="{{ $user->id }}">{{ $user->name }}</option>
-                            @endforeach
-                        </select>
+@extends("Admin.Layouts.Master")
+@section('Title', 'Schedule Management')
+@section('Content')
+<div class="container-scroller">
+    <x-admin.layouts.header-dashboard/>
+    <div class="container-fluid page-body-wrapper">
+        <div class="theme-setting-wrapper">
+        </div>
+        <div class="side-bar-box" style="width: 250px;">
+            <x-admin.layouts.side-bar/>
+        </div>
+        <div class="main-panel">
+            <div class="content-wrapper p-3">
+                <div class="row">
+                    <div class="col-md-12 grid-margin">
+                        <div class="row">
+                            <div class="col-12 col-xl-12 mb-4 mb-xl-0 p-0">
+                                <div class="bg-white">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h3 class="card-title">Schedule Management</h3>
+                                            <div class="card-tools">
+                                                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addScheduleModal">
+                                                    Add New Schedule
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-bordered">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Employee</th>
+                                                            <th>Department</th>
+                                                            <th>Position</th>
+                                                            <th>Shift Start</th>
+                                                            <th>Shift End</th>
+                                                            <th>Break Start</th>
+                                                            <th>Break End</th>
+                                                            <th>Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach($schedules as $schedule)
+                                                            <tr>
+                                                                <td>{{ $schedule->user->name }}</td>
+                                                                <td>{{ $schedule->user->department->name ?? '-' }}</td>
+                                                                <td>{{ $schedule->user->position->name ?? '-' }}</td>
+                                                                <td>{{ $schedule->shift_start }}</td>
+                                                                <td>{{ $schedule->shift_end }}</td>
+                                                                <td>{{ $schedule->break_start }}</td>
+                                                                <td>{{ $schedule->break_end }}</td>
+                                                                <td>
+                                                                    <button type="button" class="btn btn-sm btn-info edit-schedule" 
+                                                                            data-id="{{ $schedule->id }}"
+                                                                            data-user="{{ $schedule->user_id }}"
+                                                                            data-shift-start="{{ $schedule->shift_start }}"
+                                                                            data-shift-end="{{ $schedule->shift_end }}"
+                                                                            data-break-start="{{ $schedule->break_start }}"
+                                                                            data-break-end="{{ $schedule->break_end }}">
+                                                                        <i class="fas fa-edit"></i>
+                                                                    </button>
+                                                                    <button type="button" class="btn btn-sm btn-danger delete-schedule" 
+                                                                            data-id="{{ $schedule->id }}">
+                                                                        <i class="fas fa-trash"></i>
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            {{ $schedules->links() }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="card-body">
-                    <div id="calendar"></div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Schedule Modal -->
-<div class="modal fade" id="scheduleModal" tabindex="-1" role="dialog">
+<!-- Add Schedule Modal -->
+<div class="modal fade" id="addScheduleModal" tabindex="-1" role="dialog" aria-labelledby="addScheduleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Manage Shift Schedule</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
+                <h5 class="modal-title" id="addScheduleModalLabel">Add New Schedule</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
-                <form id="scheduleForm">
-                    <input type="hidden" id="schedule_id">
+            <form id="addScheduleForm" action="{{ route('admin.schedule.store') }}" method="POST">
+                @csrf
+                <div class="modal-body">
                     <div class="form-group">
-                        <label>Staff Member</label>
-                        <select name="user_id" id="user_id" class="form-control" required>
-                            <option value="">Select Staff</option>
+                        <label for="user_id">Employee</label>
+                        <select class="form-control" id="user_id" name="user_id" required>
+                            <option value="">Select Employee</option>
                             @foreach($users as $user)
                                 <option value="{{ $user->id }}">{{ $user->name }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Date</label>
-                        <input type="date" name="date" id="date" class="form-control" required>
+                        <label for="shift_start">Shift Start Time</label>
+                        <input type="time" class="form-control" id="shift_start" name="shift_start" required>
                     </div>
                     <div class="form-group">
-                        <label>Shift Start</label>
-                        <input type="time" name="shift_start" id="shift_start" class="form-control" required>
+                        <label for="shift_end">Shift End Time</label>
+                        <input type="time" class="form-control" id="shift_end" name="shift_end" required>
                     </div>
                     <div class="form-group">
-                        <label>Shift End</label>
-                        <input type="time" name="shift_end" id="shift_end" class="form-control" required>
+                        <label for="break_start">Break Start Time</label>
+                        <input type="time" class="form-control" id="break_start" name="break_start" required>
                     </div>
                     <div class="form-group">
-                        <label>Break Start</label>
-                        <input type="time" name="break_start" id="break_start" class="form-control">
+                        <label for="break_end">Break End Time</label>
+                        <input type="time" class="form-control" id="break_end" name="break_end" required>
                     </div>
-                    <div class="form-group">
-                        <label>Break End</label>
-                        <input type="time" name="break_end" id="break_end" class="form-control">
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-danger" id="deleteSchedule" style="display: none;">Delete</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="saveSchedule">Save</button>
-            </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Schedule</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
-@endsection
+
+<!-- Edit Schedule Modal -->
+<div class="modal fade" id="editScheduleModal" tabindex="-1" role="dialog" aria-labelledby="editScheduleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editScheduleModalLabel">Edit Schedule</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="editScheduleForm" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="edit_user_id">Employee</label>
+                        <select class="form-control" id="edit_user_id" name="user_id" required>
+                            <option value="">Select Employee</option>
+                            @foreach($users as $user)
+                                <option value="{{ $user->id }}">{{ $user->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_shift_start">Shift Start Time</label>
+                        <input type="time" class="form-control" id="edit_shift_start" name="shift_start" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_shift_end">Shift End Time</label>
+                        <input type="time" class="form-control" id="edit_shift_end" name="shift_end" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_break_start">Break Start Time</label>
+                        <input type="time" class="form-control" id="edit_break_start" name="break_start" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_break_end">Break End Time</label>
+                        <input type="time" class="form-control" id="edit_break_end" name="break_end" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Update Schedule</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 @push('scripts')
-<script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js'></script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js'></script>
 <script>
 $(document).ready(function() {
-    var calendar = $('#calendar').fullCalendar({
-        header: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'month,agendaWeek,agendaDay'
-        },
-        events: {
-            url: '{{ route("admin.schedule.events") }}',
-            data: function() {
-                return {
-                    user_id: $('#staff-filter').val()
-                };
-            }
-        },
-        selectable: true,
-        selectHelper: true,
-        select: function(start, end) {
-            $('#scheduleModal').modal('show');
-            $('#date').val(moment(start).format('YYYY-MM-DD'));
-            $('#schedule_id').val('');
-            $('#deleteSchedule').hide();
-        },
-        eventClick: function(event) {
-            $.get('{{ route("admin.schedule.get") }}/' + event.id, function(data) {
-                $('#schedule_id').val(data.id);
-                $('#user_id').val(data.user_id);
-                $('#date').val(moment(data.date).format('YYYY-MM-DD'));
-                $('#shift_start').val(moment(data.shift_start).format('HH:mm'));
-                $('#shift_end').val(moment(data.shift_end).format('HH:mm'));
-                $('#break_start').val(data.break_start ? moment(data.break_start).format('HH:mm') : '');
-                $('#break_end').val(data.break_end ? moment(data.break_end).format('HH:mm') : '');
-                $('#deleteSchedule').show();
-                $('#scheduleModal').modal('show');
-            });
-        },
-        eventRender: function(event, element) {
-            if (event.break_start && event.break_end) {
-                element.find('.fc-title').append('<br/>Break: ' + 
-                    moment(event.break_start).format('HH:mm') + ' - ' + 
-                    moment(event.break_end).format('HH:mm'));
-            }
-        },
-        eventColor: '#3c8dbc',
-        timeFormat: 'H:mm',
-        displayEventEnd: true,
+    // Edit Schedule
+    $('.edit-schedule').click(function() {
+        var id = $(this).data('id');
+        var userId = $(this).data('user');
+        var shiftStart = $(this).data('shift-start');
+        var shiftEnd = $(this).data('shift-end');
+        var breakStart = $(this).data('break-start');
+        var breakEnd = $(this).data('break-end');
+
+        $('#edit_user_id').val(userId);
+        $('#edit_shift_start').val(shiftStart);
+        $('#edit_shift_end').val(shiftEnd);
+        $('#edit_break_start').val(breakStart);
+        $('#edit_break_end').val(breakEnd);
+
+        $('#editScheduleForm').attr('action', '/admin/schedule/' + id);
+        $('#editScheduleModal').modal('show');
     });
 
-    $('#staff-filter').change(function() {
-        calendar.fullCalendar('refetchEvents');
-    });
-
-    $('#saveSchedule').click(function() {
-        var formData = {
-            id: $('#schedule_id').val(),
-            user_id: $('#user_id').val(),
-            date: $('#date').val(),
-            shift_start: $('#shift_start').val(),
-            shift_end: $('#shift_end').val(),
-            break_start: $('#break_start').val(),
-            break_end: $('#break_end').val(),
-        };
-
-        $.ajax({
-            url: formData.id ? 
-                '{{ route("admin.schedule.update") }}/' + formData.id : 
-                '{{ route("admin.schedule.store") }}',
-            method: formData.id ? 'PUT' : 'POST',
-            data: formData,
-            success: function(response) {
-                $('#scheduleModal').modal('hide');
-                calendar.fullCalendar('refetchEvents');
-            },
-            error: function(xhr) {
-                alert('Error saving schedule: ' + xhr.responseJSON.message);
-            }
-        });
-    });
-
-    $('#deleteSchedule').click(function() {
+    // Delete Schedule
+    $('.delete-schedule').click(function() {
+        var id = $(this).data('id');
         if (confirm('Are you sure you want to delete this schedule?')) {
             $.ajax({
-                url: '{{ route("admin.schedule.delete") }}/' + $('#schedule_id').val(),
-                method: 'DELETE',
-                success: function() {
-                    $('#scheduleModal').modal('hide');
-                    calendar.fullCalendar('refetchEvents');
+                url: '/admin/schedule/' + id,
+                type: 'DELETE',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    location.reload();
+                },
+                error: function(xhr) {
+                    alert('Error deleting schedule');
                 }
             });
         }
     });
-
-    $('#scheduleModal').on('hidden.bs.modal', function() {
-        $('#scheduleForm')[0].reset();
-    });
 });
 </script>
-@endpush 
+@endpush
+@endsection 

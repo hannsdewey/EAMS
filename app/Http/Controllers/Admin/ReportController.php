@@ -3,57 +3,46 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Attendance;
+use App\Models\Leave;
 use App\Models\Report;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class ReportController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Report::with('user');
+        $query = User::where('role', 'staff');
 
-        // Apply date filters
-        if ($request->filled('year')) {
-            $query->whereYear('report_date', $request->year);
+        // Apply filters
+        if ($request->filled('department')) {
+            $query->where('department_id', $request->department);
         }
-        if ($request->filled('month')) {
-            $query->whereMonth('report_date', $request->month);
-        }
-
-        // Filter by user if specified
-        if ($request->filled('user_id')) {
-            $query->where('user_id', $request->user_id);
+        if ($request->filled('position')) {
+            $query->where('position_id', $request->position);
         }
 
-        $reports = $query->orderBy('report_date', 'desc')->paginate(10);
-        $users = User::where('role', 'staff')->get();
-        
-        // Get summary data for charts
-        $summary = Report::selectRaw('
-            SUM(total_present) as total_present,
-            SUM(total_absent) as total_absent,
-            SUM(total_late) as total_late,
-            SUM(total_leave) as total_leave,
-            SUM(total_work_hours) as total_work_hours,
-            SUM(total_overtime_hours) as total_overtime_hours,
-            SUM(active_shifts) as total_shifts
-        ');
+        $users = $query->get();
 
-        if ($request->filled('user_id')) {
-            $summary->where('user_id', $request->user_id);
-        }
+        // Get attendance summary
+        $attendanceSummary = Attendance::selectRaw('
+            COUNT(*) as total_days,
+            SUM(CASE WHEN status = "present" THEN 1 ELSE 0 END) as present_days,
+            SUM(CASE WHEN status = "absent" THEN 1 ELSE 0 END) as absent_days,
+            SUM(CASE WHEN status = "late" THEN 1 ELSE 0 END) as late_days
+        ')->first();
 
-        $summary = $summary->first();
+        // Get leave summary
+        $leaveSummary = Leave::selectRaw('
+            COUNT(*) as total_requests,
+            SUM(CASE WHEN status = "approved" THEN 1 ELSE 0 END) as approved_requests,
+            SUM(CASE WHEN status = "rejected" THEN 1 ELSE 0 END) as rejected_requests,
+            SUM(CASE WHEN status = "pending" THEN 1 ELSE 0 END) as pending_requests
+        ')->first();
 
-        return view('admin.reports.index', [
-            'reports' => $reports,
-            'users' => $users,
-            'summary' => $summary,
-            'years' => range(date('Y') - 1, date('Y')),
-            'months' => range(1, 12),
-        ]);
+        return view('Admin.reports.index', compact('users', 'attendanceSummary', 'leaveSummary'));
     }
 
     public function generateReport()
@@ -109,4 +98,4 @@ class ReportController extends Controller
 
         return response()->json(['message' => 'Reports generated successfully']);
     }
-} 
+}
